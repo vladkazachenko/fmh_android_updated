@@ -19,6 +19,16 @@ class MainPage(BasePage):
         "ru.edu.qamid:id/our_mission_image_button"
     )
 
+    AUTHORIZATION_BUTTON = (
+        AppiumBy.ID,
+        "ru.edu.qamid:id/authorization_image_button"
+    )
+
+    LOG_OUT_BUTTON = (
+        AppiumBy.XPATH,
+        '//android.widget.TextView[@text="Log out"]'
+    )
+
     def is_main_page_opened(self):
         return self.find_visible(
             self.NEWS_LIST_CONTAINER
@@ -29,3 +39,16 @@ class MainPage(BasePage):
 
     def open_our_mission(self):
         self.click(self.OUR_MISSION_BUTTON)
+
+    def restart_app(self):
+        self.driver.terminate_app(
+            "ru.edu.qamid"
+        )
+
+        self.driver.activate_app(
+            "ru.edu.qamid"
+        )
+
+    def log_out(self):
+        self.click(self.AUTHORIZATION_BUTTON)
+        self.click(self.LOG_OUT_BUTTON)

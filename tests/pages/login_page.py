@@ -34,14 +34,27 @@ class LoginPage(BasePage):
         "//android.widget.Toast"
     )
 
+    def is_login_page_opened(self):
+        return self.find_visible(
+            self.LOGIN_FIELD
+        ).is_displayed()
+
     def enter_login(self, login):
-        self.enter_text(self.LOGIN_FIELD, login)
+        self.enter_text(
+            self.LOGIN_FIELD,
+            login
+        )
 
     def enter_password(self, password):
-        self.enter_text(self.PASSWORD_FIELD, password)
+        self.enter_text(
+            self.PASSWORD_FIELD,
+            password
+        )
 
     def click_sign_in(self):
-        self.click(self.SIGN_IN_BUTTON)
+        self.click(
+            self.SIGN_IN_BUTTON
+        )
 
     def login(self, login, password):
         self.enter_login(login)
