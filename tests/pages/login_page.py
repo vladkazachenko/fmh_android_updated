@@ -19,6 +19,11 @@ class LoginPage(BasePage):
         "ru.edu.qamid:id/enter_button"
     )
 
+    EMPTY_FIELDS_TOAST = (
+        AppiumBy.XPATH,
+        "//android.widget.Toast[@text='Login and password cannot be empty']"
+    )
+
     def enter_login(self, login):
         self.enter_text(self.LOGIN_FIELD, login)
 
@@ -32,3 +37,8 @@ class LoginPage(BasePage):
         self.enter_login(login)
         self.enter_password(password)
         self.click_sign_in()
+
+    def get_empty_fields_error(self):
+        return self.find_present(
+            self.EMPTY_FIELDS_TOAST
+        ).get_attribute("text")
