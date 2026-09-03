@@ -1,3 +1,5 @@
+from selenium.common.exceptions import TimeoutException
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from tests.pages.base_page import BasePage
@@ -50,14 +52,40 @@ class CreateEditNewsPage(BasePage):
         ).is_displayed()
 
     def select_category(self, category):
-        self.click(self.CATEGORY_FIELD)
-
         category_option = (
             AppiumBy.XPATH,
             f'//android.widget.TextView[@text="{category}"]'
         )
 
-        self.click(category_option)
+        for attempt in range(3):
+            self.click(self.CATEGORY_FIELD)
+
+            try:
+                option = self.find_present(
+                    category_option,
+                    timeout=7
+                )
+                option.click()
+
+                selected_category = self.find_visible(
+                    self.CATEGORY_FIELD
+                ).get_attribute("text")
+
+                if selected_category != category:
+                    raise AssertionError(
+                        f'Ожидалась категория "{category}", '
+                        f'но выбрана "{selected_category}"'
+                    )
+
+                return
+
+            except TimeoutException:
+                if attempt < 2:
+                    self.driver.back()
+
+        raise TimeoutException(
+            f'Не удалось выбрать категорию "{category}"'
+        )
 
     def enter_title(self, title):
         self.enter_text(
@@ -77,6 +105,29 @@ class CreateEditNewsPage(BasePage):
         self.enter_text(
             self.DESCRIPTION_FIELD,
             description
+        )
+
+    def get_title(self):
+        return self.find_visible(
+            self.TITLE_FIELD
+        ).get_attribute("text")
+
+    def get_description(self):
+        return self.find_visible(
+            self.DESCRIPTION_FIELD
+        ).get_attribute("text")
+
+    def is_news_opened_for_edit(self, expected_title):
+        return self.get_title() == expected_title
+
+    def are_news_changes_saved(
+        self,
+        expected_title,
+        expected_description
+    ):
+        return (
+            self.get_title() == expected_title
+            and self.get_description() == expected_description
         )
 
     def save_news(self):
