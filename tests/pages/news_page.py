@@ -3,21 +3,21 @@ from appium.webdriver.common.appiumby import AppiumBy
 from tests.pages.base_page import BasePage
 
 
-class MainPage(BasePage):
+class NewsPage(BasePage):
     NEWS_LIST_CONTAINER = (
         AppiumBy.ID,
-        "ru.edu.qamid:id/main_news_list_container"
+        "ru.edu.qamid:id/news_list_container"
     )
 
-    ALL_NEWS_BUTTON = (
+    CONTROL_PANEL_BUTTON = (
         AppiumBy.ID,
-        "ru.edu.qamid:id/all_news_text_view"
+        "ru.edu.qamid:id/news_edit_button"
     )
 
-    def is_main_page_opened(self):
+    def is_news_page_opened(self):
         return self.find_visible(
             self.NEWS_LIST_CONTAINER
         ).is_displayed()
 
-    def open_news(self):
-        self.click(self.ALL_NEWS_BUTTON)
+    def open_control_panel(self):
+        self.click(self.CONTROL_PANEL_BUTTON)

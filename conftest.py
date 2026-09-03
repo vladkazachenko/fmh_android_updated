@@ -19,6 +19,10 @@ def driver():
         options=options
     )
 
+    driver.update_settings({
+        "enableMultiWindows": True
+    })
+
     yield driver
 
     driver.quit()
