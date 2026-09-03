@@ -12,8 +12,14 @@ class BasePage:
             EC.visibility_of_element_located(locator)
         )
 
-    def find_present(self, locator):
-        return self.wait.until(
+    def find_present(self, locator, timeout=None):
+        wait = (
+            self.wait
+            if timeout is None
+            else WebDriverWait(self.driver, timeout)
+        )
+
+        return wait.until(
             EC.presence_of_element_located(locator)
         )
 

@@ -24,6 +24,16 @@ class LoginPage(BasePage):
         "//android.widget.Toast[@text='Login and password cannot be empty']"
     )
 
+    WRONG_CREDENTIALS_TOAST = (
+        AppiumBy.XPATH,
+        "//android.widget.Toast[@text='Wrong login or password']"
+    )
+
+    TOAST = (
+        AppiumBy.XPATH,
+        "//android.widget.Toast"
+    )
+
     def enter_login(self, login):
         self.enter_text(self.LOGIN_FIELD, login)
 
@@ -41,4 +51,15 @@ class LoginPage(BasePage):
     def get_empty_fields_error(self):
         return self.find_present(
             self.EMPTY_FIELDS_TOAST
+        ).get_attribute("text")
+
+    def get_wrong_credentials_error(self):
+        return self.find_present(
+            self.WRONG_CREDENTIALS_TOAST
+        ).get_attribute("text")
+
+    def get_toast_text(self, timeout=30):
+        return self.find_present(
+            self.TOAST,
+            timeout=timeout
         ).get_attribute("text")
