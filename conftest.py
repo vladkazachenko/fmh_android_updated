@@ -1,5 +1,6 @@
 import subprocess
 
+import allure
 import pytest
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -8,8 +9,20 @@ from appium.options.android import UiAutomator2Options
 APP_PACKAGE = "ru.edu.qamid"
 
 
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    report = outcome.get_result()
+
+    setattr(
+        item,
+        f"rep_{report.when}",
+        report
+    )
+
+
 @pytest.fixture
-def driver():
+def driver(request):
     subprocess.run(
         [
             "adb",
@@ -42,5 +55,24 @@ def driver():
     })
 
     yield driver
+
+    test_report = getattr(
+        request.node,
+        "rep_call",
+        None
+    )
+
+    if (
+        test_report is not None
+        and test_report.failed
+    ):
+        try:
+            allure.attach(
+                driver.get_screenshot_as_png(),
+                name="Скриншот при падении теста",
+                attachment_type=allure.attachment_type.PNG
+            )
+        except Exception:
+            pass
 
     driver.quit()
