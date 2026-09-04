@@ -1,3 +1,5 @@
+from selenium.common.exceptions import StaleElementReferenceException
+
 from appium.webdriver.common.appiumby import AppiumBy
 
 from tests.pages.base_page import BasePage
@@ -12,6 +14,16 @@ class ControlPanelPage(BasePage):
     ADD_NEWS_BUTTON = (
         AppiumBy.ID,
         "ru.edu.qamid:id/add_news_image_view"
+    )
+
+    MAIN_MENU_BUTTON = (
+        AppiumBy.ID,
+        "ru.edu.qamid:id/main_menu_image_button"
+    )
+
+    NEWS_MENU_ITEM = (
+        AppiumBy.XPATH,
+        '//android.widget.TextView[@text="News"]'
     )
 
     DELETE_DIALOG_MESSAGE = (
@@ -36,6 +48,15 @@ class ControlPanelPage(BasePage):
 
     def return_to_news(self):
         self.driver.back()
+
+    def open_news_from_menu(self):
+        self.click(
+            self.MAIN_MENU_BUTTON
+        )
+
+        self.click(
+            self.NEWS_MENU_ITEM
+        )
 
     def _xpath_literal(self, text):
         if '"' not in text:
@@ -75,11 +96,75 @@ class ControlPanelPage(BasePage):
             f'and @text={title_literal}]'
         )
 
+    def _get_news_action_locator(
+        self,
+        title,
+        action_resource_id
+    ):
+        title_literal = self._xpath_literal(
+            title
+        )
+
+        return (
+            AppiumBy.XPATH,
+            '//*[@resource-id='
+            '"ru.edu.qamid:id/news_item_material_card_view"]'
+            '[.//*[@resource-id='
+            '"ru.edu.qamid:id/news_item_title_text_view" '
+            f'and @text={title_literal}]]'
+            '//*[@resource-id='
+            f'"{action_resource_id}"]'
+        )
+
     def _scroll_to_news_title(self, title):
         return self.find_visible(
             self._get_news_title_locator(
                 title
             )
+        )
+
+    def _scroll_to_news_action(
+        self,
+        title,
+        action_locator
+    ):
+        self._scroll_to_news_title(
+            title
+        )
+
+        news_list = self.find_visible(
+            self.NEWS_LIST
+        )
+
+        for _ in range(4):
+            action_elements = (
+                self.driver.find_elements(
+                    *action_locator
+                )
+            )
+
+            for action_element in action_elements:
+                try:
+                    if (
+                        action_element.is_displayed()
+                        and action_element.is_enabled()
+                    ):
+                        return action_element
+
+                except StaleElementReferenceException:
+                    continue
+
+            self.driver.execute_script(
+                "mobile: scrollGesture",
+                {
+                    "elementId": news_list.id,
+                    "direction": "down",
+                    "percent": 0.2
+                }
+            )
+
+        return self.find_clickable(
+            action_locator
         )
 
     def is_news_present(self, title):
@@ -107,46 +192,37 @@ class ControlPanelPage(BasePage):
 
     def open_news_for_edit(self, title):
         edit_button = (
-            AppiumBy.ANDROID_UIAUTOMATOR,
-            'new UiScrollable('
-            'new UiSelector().resourceId('
-            '"ru.edu.qamid:id/news_list_recycler_view"))'
-            '.scrollIntoView('
-            'new UiSelector().resourceId('
-            '"ru.edu.qamid:id/news_item_title_text_view")'
-            f'.text("{title}")'
-            '.fromParent('
-            'new UiSelector().resourceId('
-            '"ru.edu.qamid:id/news_item_edit_image_view")))'
+            self._get_news_action_locator(
+                title,
+                "ru.edu.qamid:id/news_item_edit_image_view"
+            )
         )
 
-        self.click(
-            edit_button
+        edit_element = (
+            self._scroll_to_news_action(
+                title,
+                edit_button
+            )
         )
+
+        edit_element.click()
 
     def open_delete_confirmation(self, title):
-        self._scroll_to_news_title(
-            title
-        )
-
-        title_literal = self._xpath_literal(
-            title
-        )
-
         delete_button = (
-            AppiumBy.XPATH,
-            '//*[@resource-id='
-            '"ru.edu.qamid:id/news_item_material_card_view"]'
-            '[.//*[@resource-id='
-            '"ru.edu.qamid:id/news_item_title_text_view" '
-            f'and @text={title_literal}]]'
-            '//*[@resource-id='
-            '"ru.edu.qamid:id/news_item_delete_image_view"]'
+            self._get_news_action_locator(
+                title,
+                "ru.edu.qamid:id/news_item_delete_image_view"
+            )
         )
 
-        self.click(
-            delete_button
+        delete_element = (
+            self._scroll_to_news_action(
+                title,
+                delete_button
+            )
         )
+
+        delete_element.click()
 
     def get_delete_confirmation_message(self):
         return self.find_visible(

@@ -1,5 +1,4 @@
 from selenium.common.exceptions import TimeoutException
-
 from appium.webdriver.common.appiumby import AppiumBy
 
 from tests.pages.base_page import BasePage
@@ -9,6 +8,12 @@ class CreateEditNewsPage(BasePage):
     CATEGORY_FIELD = (
         AppiumBy.ID,
         "ru.edu.qamid:id/news_category_auto_complete"
+    )
+
+    CATEGORY_WARNING_ICON = (
+        AppiumBy.XPATH,
+        '//*[@resource-id="ru.edu.qamid:id/news_category_text_input_layout"]'
+        '//*[@resource-id="ru.edu.qamid:id/text_input_start_icon"]'
     )
 
     TITLE_FIELD = (
@@ -58,13 +63,16 @@ class CreateEditNewsPage(BasePage):
         )
 
         for attempt in range(3):
-            self.click(self.CATEGORY_FIELD)
+            self.click(
+                self.CATEGORY_FIELD
+            )
 
             try:
                 option = self.find_present(
                     category_option,
                     timeout=7
                 )
+
                 option.click()
 
                 selected_category = self.find_visible(
@@ -94,12 +102,22 @@ class CreateEditNewsPage(BasePage):
         )
 
     def select_current_date(self):
-        self.click(self.DATE_FIELD)
-        self.click(self.DIALOG_OK_BUTTON)
+        self.click(
+            self.DATE_FIELD
+        )
+
+        self.click(
+            self.DIALOG_OK_BUTTON
+        )
 
     def select_current_time(self):
-        self.click(self.TIME_FIELD)
-        self.click(self.DIALOG_OK_BUTTON)
+        self.click(
+            self.TIME_FIELD
+        )
+
+        self.click(
+            self.DIALOG_OK_BUTTON
+        )
 
     def enter_description(self, description):
         self.enter_text(
@@ -117,8 +135,19 @@ class CreateEditNewsPage(BasePage):
             self.DESCRIPTION_FIELD
         ).get_attribute("text")
 
-    def is_news_opened_for_edit(self, expected_title):
-        return self.get_title() == expected_title
+    def is_category_warning_visible(self):
+        return self.find_visible(
+            self.CATEGORY_WARNING_ICON
+        ).is_displayed()
+
+    def is_news_opened_for_edit(
+        self,
+        expected_title
+    ):
+        return (
+            self.get_title()
+            == expected_title
+        )
 
     def are_news_changes_saved(
         self,
@@ -126,8 +155,11 @@ class CreateEditNewsPage(BasePage):
         expected_description
     ):
         return (
-            self.get_title() == expected_title
-            and self.get_description() == expected_description
+            self.get_title()
+            == expected_title
+            and
+            self.get_description()
+            == expected_description
         )
 
     def save_news(self):
@@ -136,9 +168,13 @@ class CreateEditNewsPage(BasePage):
 
         save_button = (
             AppiumBy.ANDROID_UIAUTOMATOR,
-            'new UiScrollable(new UiSelector().scrollable(true))'
-            '.scrollIntoView(new UiSelector().resourceId('
+            'new UiScrollable('
+            'new UiSelector().scrollable(true))'
+            '.scrollIntoView('
+            'new UiSelector().resourceId('
             '"ru.edu.qamid:id/news_save_button"))'
         )
 
-        self.click(save_button)
+        self.click(
+            save_button
+        )
